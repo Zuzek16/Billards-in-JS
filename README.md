@@ -1,6 +1,9 @@
 ## Billards-in-JS
 A billard game in JS
 
+# Disclaimer!
+The matter.js file is not made my me! I included it to make it easier to include in my project!
+
 # Technologies used
 Matter.js
 

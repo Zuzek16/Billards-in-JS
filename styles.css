@@ -1,0 +1,61 @@
+:root {
+    --text-color: #B0E6FF;
+    --background-color: #060824;
+    --accent-color: #1e5e72;
+    --accent-color-dark: #1b3652;
+    --font-size: 18px;
+}
+
+
+* {
+    font-size: var(--font-size);
+    color: var(--text-color);
+    background-color: var(--background-color);
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    width: 100%;
+    height: 100vh;
+}
+
+.center {
+    margin: auto;
+    display: block;
+}
+
+.left {
+    float: left;
+}
+
+.right {
+    float: right;
+}
+
+.imgContainer img{
+    height: 100%;
+    width: auto;
+}
+
+/* ^^^ boiler18pxplate - my own */
+
+.main {
+    width: 55%;
+    height: fit-content;
+}
+
+#canvasContainer {
+    display: flex;
+    justify-content: center;
+    height: 123px;
+    width: 100%;
+
+}
+
+#canvas {
+    margin-left: auto;
+    margin-right: auto;
+}
+
