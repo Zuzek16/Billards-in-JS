@@ -5,16 +5,14 @@ var Engine = Matter.Engine,
     Composite = Matter.Composite;
 
 let canvas = document.getElementById("canvas");
-let canvasSize = 500;
+let canvasSize = 850;
 // canvas.width = canvasSize*2;
 // canvas.height = canvasSize;
 // create an engine
 var engine = Engine.create({
-    options: {
-        gravity: 0,
-        scale: 0    
-    }
-
+    gravity: {
+        scale: 0
+    },
 });
 
 // create a renderer
@@ -30,7 +28,7 @@ var render = Render.create({//was hard to find info on this!
 });
 
 // create two boxes and a ground
-var boxA = Bodies.rectangle(400, 200, 80, 80);
+var boxA = Bodies.rectangle(410, 200, 120, 80);
 var boxB = Bodies.rectangle(450, 50, 80, 80);
 var ground = Bodies.rectangle(400, 610, 810, 60, { isStatic: true });
 

@@ -58,14 +58,13 @@ button:hover, a:hover, input:hover {
 #canvasContainer {
     display: flex;
     justify-content: center;
-    height: 123px;
-    width: 100%;
+    /* height: 123px; */
+    /* width: 100%; */
 
 }
 
 #canvas {
-    margin-left: auto;
-    margin-right: auto;
+    margin: auto;
 }
 
 .closer {
@@ -76,17 +75,23 @@ header img, header button, a {
     background-color: var(--accent-color-dark);
 }
 
+header img {
+    width: 80px;
+    height: 80px;
+}
+
 header button {
     box-shadow: var(--accent-color) 0px 0px calc(var(--font-size)/2);
 }
 
 header {
-    background-color: var(--accent-color-dark);
-    padding-left: 12px;
-    padding-right: 12px;
+    background: var(--accent-color-dark);
+    background: linear-gradient(180deg, var(--accent-color-dark) 0%, var(--background-color) 100%);    padding-left: 30px;
+    padding-right: 30px;
     display: flex;
     justify-content: space-between;
-    height: 20%;
+    min-height: fit-content;
+    height: 17%;
     width: 100%;
     align-items: center;
 }
@@ -110,4 +115,19 @@ a button {
     border: 2px var(--accent-color) solid;
     width: calc(var(--font-size-bigger) + 40px);
     border-radius: 48%;
+}
+
+header a {
+    height: 100%;
+}
+
+header a button {
+    min-height: 100%;
+}
+
+/* game */
+body.exception {
+    display: flex;
+    align-items: center;
+    align-content: center;
 }
