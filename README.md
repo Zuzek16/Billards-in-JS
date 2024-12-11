@@ -1,5 +1,5 @@
 # Billards-in-JS
-A billard game in JS using matter.js for physics
+A billards game of eight-ball in JS using matter.js for physics
 
 ## Disclaimer!
 The matter.js file is not made my me! I downloaded it from the matter-js repo (https://github.com/liabru/matter-js/wiki/Getting-started) I included it to make it easier to run my project for other people!
