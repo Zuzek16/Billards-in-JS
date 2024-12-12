@@ -14,3 +14,4 @@ https://zuzek16.github.io/Billards-in-JS/
 
 ### Ideas for future updates
  - Textures for the balls
+ - customizable table variables

@@ -1,89 +1,101 @@
-
+let canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+let canvasSize = 850;
 
 var Engine = Matter.Engine,
+    Body = Matter.Body,
     Render = Matter.Render,
     Runner = Matter.Runner,
     Bodies = Matter.Bodies,
     Composite = Matter.Composite;
 
+    //https://www.w3resource.com/javascript-exercises/javascript-math-exercise-33.php
+function degrees_to_radians(degrees) {
+    return degrees * ((Math.PI)/180);
+}
+// const halfBallTexture = new Image("img/ball_half.png");
 
-    function renderTable(size = 100) {//
-        let railRadius = 15;
-        let width;
-        let height;
+// halfBallTexture.addEventListener("load", (e) => {
+//     ctx.drawImage(halfBallTexture, 33, 71, 104, 124, 21, 20, 87, 104);
+//   });
+  
+
+
+//     function renderTable(size = 100) {//
+//         let railRadius = 15;
+//         let width;
+//         let height;
     
-        let tablex = two.width * 0.5;
-        let tabley = two.height * 0.5;
-        let rail = two.makeRoundedRectangle(tablex, tabley, width, height, railRadius);
-        rail.stroke = Color.rail;
-        rail.linewidth = 15;
-        rail.fill = Color.field;
-        const detail = [];
-        let pf = 16;
-        // for (let i = 0; i < 4; i++) {
+//         let tablex = two.width * 0.5;
+//         let tabley = two.height * 0.5;
+//         let rail = two.makeRoundedRectangle(tablex, tabley, width, height, railRadius);
+//         rail.stroke = Color.rail;
+//         rail.linewidth = 15;
+//         rail.fill = Color.field;
+//         const detail = [];
+//         let pf = 16;
+//         // for (let i = 0; i < 4; i++) {
     
-        //   switch (i) {
-        //     case 0:
-        //   detail[i] = two.makeRoundedRectangle(tablex - (width/2) + pf, tabley - height/2 + pf, size/10, size/10, 25);
+//         //   switch (i) {
+//         //     case 0:
+//         //   detail[i] = two.makeRoundedRectangle(tablex - (width/2) + pf, tabley - height/2 + pf, size/10, size/10, 25);
               
-        //       break;
-        //     case 1:
-        //   detail[i] = two.makeRoundedRectangle(tablex + (width/2) - pf, tabley - height/2 + pf, size/10, size/10, 25);
+//         //       break;
+//         //     case 1:
+//         //   detail[i] = two.makeRoundedRectangle(tablex + (width/2) - pf, tabley - height/2 + pf, size/10, size/10, 25);
               
-        //       break;
-        //     case 2:
-        //   detail[i] = two.makeRoundedRectangle(tablex - (width/2) +pf, tabley + height/2 - pf, size/10, size/10, 25);
+//         //       break;
+//         //     case 2:
+//         //   detail[i] = two.makeRoundedRectangle(tablex - (width/2) +pf, tabley + height/2 - pf, size/10, size/10, 25);
               
-        //       break;
-        //     case 3:
-        //   detail[i] = two.makeRoundedRectangle(tablex + (width/2) - pf, tabley + height/2 - pf, size/10, size/10, 25);
+//         //       break;
+//         //     case 3:
+//         //   detail[i] = two.makeRoundedRectangle(tablex + (width/2) - pf, tabley + height/2 - pf, size/10, size/10, 25);
               
-        //       break;
+//         //       break;
             
-        //   }
+//         //   }
           
-        // }
-        detail.forEach(el => {
-          el.fill = Color.field;
-          el.stroke = Color.field;
-        });
+//         // }
+//         detail.forEach(el => {
+//           el.fill = Color.field;
+//           el.stroke = Color.field;
+//         });
     
     
-        let numberOfPockets = 6;//only even ?
-        let pocketSize = size/40;
-        const pockets = [];//starting from the upper left corner -> clockwise
-        const isCornerPocket = [1, 0, 1, 1, 0, 1];
-        let y = 0;
-        let x = 0;
-        for (let i = 0; i < numberOfPockets; i++) {
+//         let numberOfPockets = 6;//only even ?
+//         let pocketSize = size/40;
+//         const pockets = [];//starting from the upper left corner -> clockwise
+//         const isCornerPocket = [1, 0, 1, 1, 0, 1];
+//         let y = 0;
+//         let x = 0;
+//         for (let i = 0; i < numberOfPockets; i++) {
           
-          if ((numberOfPockets/2) > i) {
-            if (i == 0) {
-            x = tablex - (width/2);
-            } else {
-            x = tablex - (width/2) + (width/i);
-            }
-            y = tabley - height/2;
-          } else {
-            if (i == 0 || (i-(numberOfPockets/2)) == 0) {
-              x = tablex - (width/2);
-              } else {
-              x = tablex - (width/2) + (width/(i-(numberOfPockets/2)));
-              }
+//           if ((numberOfPockets/2) > i) {
+//             if (i == 0) {
+//             x = tablex - (width/2);
+//             } else {
+//             x = tablex - (width/2) + (width/i);
+//             }
+//             y = tabley - height/2;
+//           } else {
+//             if (i == 0 || (i-(numberOfPockets/2)) == 0) {
+//               x = tablex - (width/2);
+//               } else {
+//               x = tablex - (width/2) + (width/(i-(numberOfPockets/2)));
+//               }
       
-            y = tabley + height/2;
-          }
+//             y = tabley + height/2;
+//           }
     
-          pockets[i] = two.makeCircle(x, y, pocketSize);
-          pockets[i].fill = "white";
-          pockets[i].stroke = "white";
-        }
+//           pockets[i] = two.makeCircle(x, y, pocketSize);
+//           pockets[i].fill = "white";
+//           pockets[i].stroke = "white";
+//         }
     
-    }
+//     }
 
 
-let canvas = document.getElementById("canvas");
-let canvasSize = 850;
 
 const buffer = [];
 let ColoredBallsNum = 15;
@@ -108,6 +120,7 @@ class Color {
     static purpleDark = "#DD00FF";
     static orangeDark = "#FFA050";
     static brownDark = "#7B2F03";
+    static pool = "#1a4a1a";
 }
 
 const colors = [Color.red, Color.yellow, Color.green, Color.purple, Color.orange, Color.brown]
@@ -140,6 +153,7 @@ var render = Render.create({//was hard to find info on this!
     engine: engine,
     canvas: canvas,
     options: {
+        background: Color.pool,
         height: canvasSize,
         width: canvasSize*2,
         showVelocity: true,
@@ -148,18 +162,22 @@ var render = Render.create({//was hard to find info on this!
 });
 
 
-
+let initX = canvasSize*1.5;
+let initY = canvasSize/2;
 
 //init balls
 const balls = [];
 let radius = 20;//Srednica!
-let x = 600;
-let y = 340;
+let x = canvasSize*1.4;
+let y = canvasSize/2;
 let line = 10;
+
+let cueballStartX = canvasSize/2;
+let cueBallStartY = canvasSize/2
 //color the balls
 
-balls[cueBallId] = Bodies.circle(x, y, radius, {render: { fillStyle: Color.white} });
-balls[eightBallId] = Bodies.circle(x, y, radius, {render: { fillStyle: Color.black} });
+balls[cueBallId] = Bodies.circle(cueballStartX, cueBallStartY, radius, {render: { fillStyle: Color.white} });
+balls[eightBallId] = Bodies.circle(initX, initY, radius, {render: { fillStyle: Color.black} });
 let timesUsed = 0;
 // for (let i = 1; i <= ColoredBallsNum; i++) {
 //     console.log("ran init of balls");
@@ -183,11 +201,11 @@ let timesUsed = 0;
     
 // }
 
-colors.forEach(color => {
+colors.forEach((color, i) => {
         
-        balls.push(Bodies.circle(x, y, radius, {render: { fillStyle: color} }));
+        balls.push(Bodies.circle(initX, initY, radius, {render: { fillStyle: color} }));
         //halves
-        balls.push(Bodies.circle(x, y, radius, {
+        balls.push(Bodies.circle(initX, initY, radius, {
             render: {fillStyle: color,
                      lineWidth: line,
                      strokeStyle: Color.white
@@ -217,6 +235,49 @@ balls.forEach(el => {
     buffer.push(el);
     
 });
+
+let triangle = [];
+let sideRotation = 60;
+let sideLength = radius*10;
+for (let i = 0; i < 3; i++) {
+    let counter = i+1;
+    if (i == 0) {
+        triangle[i] = Bodies.rectangle(initX-12, initY-(sideLength/4), 12, sideLength, {
+            isStatic: true,
+            render: {
+                fillStyle: "brown"
+            }
+        });    
+    } else if (i == 1) {
+        triangle[i] = Bodies.rectangle(initX-12, initY+(sideLength/4), 12, sideLength, {
+            isStatic: true,
+            render: {
+                fillStyle: "brown"
+            }
+        });
+    } else {
+        triangle[i] = Bodies.rectangle(initX-12+(sideLength/2), initY, 12, sideLength, {
+            isStatic: true,
+            render: {
+                fillStyle: "brown"
+            }
+        });
+    }
+    
+
+    Body.rotate(triangle[i], degrees_to_radians(60*(counter)));
+    
+}
+triangle.forEach(e => {
+buffer.push(e);
+
+});
+
+
+//debug dot
+// buffer.push(Bodies.circle(initX, initY, 10, {render: { fillStyle: "black"}, isStatic: true }))
+
+
 // add all of the bodies to the world
 Composite.add(engine.world, buffer);
 // Composite.add(engine.world, arr);
@@ -229,3 +290,12 @@ var runner = Runner.create();
 
 // run the engine
 Runner.run(runner, engine);
+
+document.addEventListener("keypress", (e)=>{
+    console.log(e);
+    if (e.key == "Enter") {
+        console.log("start game?");
+        
+    }
+    
+})
