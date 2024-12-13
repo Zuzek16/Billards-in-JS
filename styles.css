@@ -43,10 +43,10 @@ button:hover, a:hover, input:hover {
     cursor:pointer;
 }
 
-.imgContainer img{
+/* .imgContainer img{
     height: 100%;
     width: auto;
-}
+} */
 
 /* ^^^ boilerplate - my own */
 
@@ -71,17 +71,32 @@ button:hover, a:hover, input:hover {
     letter-spacing: 0px;
 }
 
-header img, header button, a {
+header button{
     background-color: var(--accent-color-dark);
 }
 
 header img {
     width: 80px;
     height: 80px;
+    background-color: rgba(0, 0, 0, 0);
+
+}
+
+img:not(header img) {
+    height: 300px;
+    width: auto;
+}
+
+button {
+    box-shadow: var(--accent-color) 0px 0px calc(var(--font-size)/2);
 }
 
 header button {
-    box-shadow: var(--accent-color) 0px 0px calc(var(--font-size)/2);
+    height: 50%;
+}
+
+button:not(header button) {
+    margin: 17px 0;
 }
 
 header {
@@ -118,11 +133,11 @@ a button {
 }
 
 header a {
-    height: 100%;
+    background-color: rgba(0, 0, 0, 0);
 }
 
 header a button {
-    min-height: 100%;
+    min-height: 50%;
 }
 
 /* game */

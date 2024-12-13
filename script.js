@@ -2,11 +2,14 @@ let canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 let canvasSize = 850;
 
+//ball ordered is scrambeled
+
 var Engine = Matter.Engine,
     Body = Matter.Body,
     Render = Matter.Render,
     Runner = Matter.Runner,
     Bodies = Matter.Bodies,
+    MouseConsraint = Matter.MouseConstraint,
     Composite = Matter.Composite;
 
     //https://www.w3resource.com/javascript-exercises/javascript-math-exercise-33.php
@@ -19,7 +22,6 @@ function degrees_to_radians(degrees) {
 //     ctx.drawImage(halfBallTexture, 33, 71, 104, 124, 21, 20, 87, 104);
 //   });
   
-
 
 //     function renderTable(size = 100) {//
 //         let railRadius = 15;
@@ -238,25 +240,26 @@ balls.forEach(el => {
 
 let triangle = [];
 let sideRotation = 60;
-let sideLength = radius*10;
+let sideLength = radius*12;
+let offset = 2;
 for (let i = 0; i < 3; i++) {
     let counter = i+1;
     if (i == 0) {
-        triangle[i] = Bodies.rectangle(initX-12, initY-(sideLength/4), 12, sideLength, {
+        triangle[i] = Bodies.rectangle(initX-12+offset, initY-(sideLength/4), 12, sideLength, {
             isStatic: true,
             render: {
                 fillStyle: "brown"
             }
         });    
     } else if (i == 1) {
-        triangle[i] = Bodies.rectangle(initX-12, initY+(sideLength/4), 12, sideLength, {
+        triangle[i] = Bodies.rectangle(initX-12+offset, initY+(sideLength/4), 12, sideLength, {
             isStatic: true,
             render: {
                 fillStyle: "brown"
             }
         });
     } else {
-        triangle[i] = Bodies.rectangle(initX-12+(sideLength/2), initY, 12, sideLength, {
+        triangle[i] = Bodies.rectangle(initX-12+offset+(sideLength/2), initY, 12, sideLength, {
             isStatic: true,
             render: {
                 fillStyle: "brown"
@@ -291,11 +294,23 @@ var runner = Runner.create();
 // run the engine
 Runner.run(runner, engine);
 
+let start = false;
 document.addEventListener("keypress", (e)=>{
     console.log(e);
     if (e.key == "Enter") {
         console.log("start game?");
-        
+        startGame();
+
     }
     
 })
+
+function startGame() {
+    start = true;
+    console.log(buffer);
+    buffer.forEach(el => {
+        if (el.label == "Rectangle Body") {
+                Composite.remove(engine.world ,el);
+        }
+    });
+}
