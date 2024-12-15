@@ -1,103 +1,24 @@
+// const Matter = require("matter-js");
+
 let canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 let canvasSize = 850;
 
-//ball ordered is scrambeled
+//ball ordered is scrambeled?
 
 var Engine = Matter.Engine,
     Body = Matter.Body,
     Render = Matter.Render,
     Runner = Matter.Runner,
     Bodies = Matter.Bodies,
-    MouseConsraint = Matter.MouseConstraint,
+    MouseConstraint = Matter.MouseConstraint,
+    Events = Matter.Events,
     Composite = Matter.Composite;
 
     //https://www.w3resource.com/javascript-exercises/javascript-math-exercise-33.php
 function degrees_to_radians(degrees) {
     return degrees * ((Math.PI)/180);
 }
-// const halfBallTexture = new Image("img/ball_half.png");
-
-// halfBallTexture.addEventListener("load", (e) => {
-//     ctx.drawImage(halfBallTexture, 33, 71, 104, 124, 21, 20, 87, 104);
-//   });
-  
-
-//     function renderTable(size = 100) {//
-//         let railRadius = 15;
-//         let width;
-//         let height;
-    
-//         let tablex = two.width * 0.5;
-//         let tabley = two.height * 0.5;
-//         let rail = two.makeRoundedRectangle(tablex, tabley, width, height, railRadius);
-//         rail.stroke = Color.rail;
-//         rail.linewidth = 15;
-//         rail.fill = Color.field;
-//         const detail = [];
-//         let pf = 16;
-//         // for (let i = 0; i < 4; i++) {
-    
-//         //   switch (i) {
-//         //     case 0:
-//         //   detail[i] = two.makeRoundedRectangle(tablex - (width/2) + pf, tabley - height/2 + pf, size/10, size/10, 25);
-              
-//         //       break;
-//         //     case 1:
-//         //   detail[i] = two.makeRoundedRectangle(tablex + (width/2) - pf, tabley - height/2 + pf, size/10, size/10, 25);
-              
-//         //       break;
-//         //     case 2:
-//         //   detail[i] = two.makeRoundedRectangle(tablex - (width/2) +pf, tabley + height/2 - pf, size/10, size/10, 25);
-              
-//         //       break;
-//         //     case 3:
-//         //   detail[i] = two.makeRoundedRectangle(tablex + (width/2) - pf, tabley + height/2 - pf, size/10, size/10, 25);
-              
-//         //       break;
-            
-//         //   }
-          
-//         // }
-//         detail.forEach(el => {
-//           el.fill = Color.field;
-//           el.stroke = Color.field;
-//         });
-    
-    
-//         let numberOfPockets = 6;//only even ?
-//         let pocketSize = size/40;
-//         const pockets = [];//starting from the upper left corner -> clockwise
-//         const isCornerPocket = [1, 0, 1, 1, 0, 1];
-//         let y = 0;
-//         let x = 0;
-//         for (let i = 0; i < numberOfPockets; i++) {
-          
-//           if ((numberOfPockets/2) > i) {
-//             if (i == 0) {
-//             x = tablex - (width/2);
-//             } else {
-//             x = tablex - (width/2) + (width/i);
-//             }
-//             y = tabley - height/2;
-//           } else {
-//             if (i == 0 || (i-(numberOfPockets/2)) == 0) {
-//               x = tablex - (width/2);
-//               } else {
-//               x = tablex - (width/2) + (width/(i-(numberOfPockets/2)));
-//               }
-      
-//             y = tabley + height/2;
-//           }
-    
-//           pockets[i] = two.makeCircle(x, y, pocketSize);
-//           pockets[i].fill = "white";
-//           pockets[i].stroke = "white";
-//         }
-    
-//     }
-
-
 
 const buffer = [];
 let ColoredBallsNum = 15;
@@ -122,7 +43,9 @@ class Color {
     static purpleDark = "#DD00FF";
     static orangeDark = "#FFA050";
     static brownDark = "#7B2F03";
+
     static pool = "#1a4a1a";
+    static hole = "#44280b";
 }
 
 const colors = [Color.red, Color.yellow, Color.green, Color.purple, Color.orange, Color.brown]
@@ -149,7 +72,6 @@ var engine = Engine.create({
     },
 });
 
-// create a renderer
 var render = Render.create({//was hard to find info on this!
     element: document.body,
     engine: engine,
@@ -163,7 +85,6 @@ var render = Render.create({//was hard to find info on this!
     }
 });
 
-
 let initX = canvasSize*1.5;
 let initY = canvasSize/2;
 
@@ -176,7 +97,6 @@ let line = 10;
 
 let cueballStartX = canvasSize/2;
 let cueBallStartY = canvasSize/2
-//color the balls
 
 balls[cueBallId] = Bodies.circle(cueballStartX, cueBallStartY, radius, {render: { fillStyle: Color.white} });
 balls[eightBallId] = Bodies.circle(initX, initY, radius, {render: { fillStyle: Color.black} });
@@ -204,7 +124,6 @@ let timesUsed = 0;
 // }
 
 colors.forEach((color, i) => {
-        
         balls.push(Bodies.circle(initX, initY, radius, {render: { fillStyle: color} }));
         //halves
         balls.push(Bodies.circle(initX, initY, radius, {
@@ -215,7 +134,6 @@ colors.forEach((color, i) => {
         }));
         
 });
-
 
 
 let size = 200;
@@ -276,10 +194,46 @@ buffer.push(e);
 
 });
 
+let numberOfPockets = 6;//only even ?
+        let pocketSize = radius*1.4;
+        const pockets = [];//starting from the upper left corner -> clockwise
+        y = 0;
+        x = 0;
+        for (let i = 0; i < numberOfPockets; i++) {
+          
+          if ((numberOfPockets/2) > i) {
+            if (i == 0) {
+            x = 0;
+            } else {
+            x = canvasSize*i;
+            }
+            y = 0;
+          } else {
+            if (i == 0) {
+              x = 0
+              } else {
+              x = canvasSize*(i-(numberOfPockets/2));
+              }
+      
+            y = canvasSize;
+          }
+    
+          pockets[i] = Bodies.circle(x, y, pocketSize, {
+            render: {
+                fillStyle: Color.hole
+            },
+            isStatic: true
+          });
 
-//debug dot
-// buffer.push(Bodies.circle(initX, initY, 10, {render: { fillStyle: "black"}, isStatic: true }))
+          buffer.push(pockets[i]);
+         
+        }
 
+pockets.forEach(el => {
+    console.log(el.position.x);
+    console.log(el.position.y);
+    console.log("--");
+});
 
 // add all of the bodies to the world
 Composite.add(engine.world, buffer);
@@ -300,17 +254,26 @@ document.addEventListener("keypress", (e)=>{
     if (e.key == "Enter") {
         console.log("start game?");
         startGame();
-
     }
-    
 })
 
 function startGame() {
+    let userMouse = Matter.Mouse.create(canvas);
+    // userMouse.setElement(canvas)
+    console.log(canvas);
+    
     start = true;
-    console.log(buffer);
     buffer.forEach(el => {
         if (el.label == "Rectangle Body") {
                 Composite.remove(engine.world ,el);
         }
     });
+    let userMConst = MouseConstraint.create(engine, {
+        mouse: userMouse
+    });
+
+    Events.on(userMConst, "startdrag", ()=>{
+        console.log("started DRAGGUNG");
+    });
+
 }
