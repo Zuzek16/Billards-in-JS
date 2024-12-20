@@ -98,7 +98,7 @@ let line = 10;
 let cueballStartX = canvasSize/2;
 let cueBallStartY = canvasSize/2
 
-balls[cueBallId] = Bodies.circle(cueballStartX, cueBallStartY, radius, {render: { fillStyle: Color.white} });
+balls[cueBallId] = Bodies.circle(cueballStartX, cueBallStartY, radius, {render: { fillStyle: Color.white}, body:{label:"cueBall"} });
 balls[eightBallId] = Bodies.circle(initX, initY, radius, {render: { fillStyle: Color.black} });
 let timesUsed = 0;
 // for (let i = 1; i <= ColoredBallsNum; i++) {
@@ -250,18 +250,27 @@ Runner.run(runner, engine);
 
 let start = false;
 document.addEventListener("keypress", (e)=>{
-    console.log(e);
     if (e.key == "Enter") {
         console.log("start game?");
         startGame();
     }
 })
 
+//https://stackoverflow.com/questions/17130395/real-mouse-position-in-canvas
+function  getMousePos(canvas, evt) {
+    let rect = canvas.getBoundingClientRect(); // abs. size of element
+    let scaleX = canvas.width / rect.width;    // relationship bitmap vs. element for x
+    let scaleY = canvas.height / rect.height;  // relationship bitmap vs. element for y
+  
+    return {
+      x: (evt.clientX - rect.left) * scaleX,   // scale mouse coordinates after they have
+      y: (evt.clientY - rect.top) * scaleY     // been adjusted to be relative to element
+    }
+  }
+
 function startGame() {
     let userMouse = Matter.Mouse.create(canvas);
     // userMouse.setElement(canvas)
-    console.log(canvas);
-    
     start = true;
     buffer.forEach(el => {
         if (el.label == "Rectangle Body") {
@@ -271,9 +280,26 @@ function startGame() {
     let userMConst = MouseConstraint.create(engine, {
         mouse: userMouse
     });
+    console.log(userMConst);
+    
+    console.log(userMConst.constraint);
+    
 
-    Events.on(userMConst, "startdrag", ()=>{
-        console.log("started DRAGGUNG");
+    Events.on(userMConst, "startdrag", (e)=>{
+        console.dir(e);
+        console.log(e.body.id);
+        if (e.body.id == 1) {//id 1 for matter js!
+            console.log("dragging cue ball");
+         
+            // console.log(e.clientX);
+            
+            e.body.position.x = +10; 
+            e.body.position.y = +10; 
+            
+        }
+        console.dir(e.body.position)
+
     });
-
 }
+
+startGame();
