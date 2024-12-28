@@ -191,7 +191,6 @@ for (let i = 0; i < 3; i++) {
 }
 triangle.forEach(e => {
 buffer.push(e);
-
 });
 
 let numberOfPockets = 6;//only even ?
@@ -268,7 +267,18 @@ function  getMousePos(canvas, evt) {
     }
   }
 
+
+
 function startGame() {
+    let oldMouse = {
+        x: 0,
+        y: 0
+    };
+    let newMouse = {
+        x: 0,
+        y: 0
+    };
+    let dragStrength = 0.02;
     let userMouse = Matter.Mouse.create(canvas);
     // userMouse.setElement(canvas)
     start = true;
@@ -280,21 +290,50 @@ function startGame() {
     let userMConst = MouseConstraint.create(engine, {
         mouse: userMouse
     });
-    console.log(userMConst);
+    // console.log(userMConst);
+    document.addEventListener("mousedown", (e) => {
+        oldMouse.x = e.clientX;
+        oldMouse.y = e.clientY;
+    })
     
-    console.log(userMConst.constraint);
-    
-
     Events.on(userMConst, "startdrag", (e)=>{
-        console.dir(e);
-        console.log(e.body.id);
+    
         if (e.body.id == 1) {//id 1 for matter js!
-            console.log("dragging cue ball");
-         
-            // console.log(e.clientX);
+            // let force = {x: dragStrength, y: dragStrength};
+            // Body.applyForce(e.body, {x: e.body.position.x, y: e.body.position.y}, force)
+        }
+        console.dir(e.body)
+
+    });
+
+    document.addEventListener("mouseup", (e) => {
+        newMouse.x = e.clientX;
+        newMouse.y = e.clientY;
+    })
+    
+    Events.on(userMConst, "enddrag", (e)=>{
+        console.dir(e);
+        console.log("STOPPED DRAGGING");
+        
+        if (e.body.id == 1) {//id 1 for matter js!
+            var difX = Math.abs(oldMouse.x - newMouse.x)
+            var difY = Math.abs(oldMouse.y - newMouse.y)
+            console.dir(e.body.position);
+            let sign = vectorSign(oldMouse, newMouse);
+            console.log(sign);
             
-            e.body.position.x = +10; 
-            e.body.position.y = +10; 
+            // console.log(e.clientX);
+            // https://stackoverflow.com/questions/72858881/matter-js-apply-force-onto-body-using-angle-and-power-level
+            var power = Math.sqrt(difX + difY)/1000
+            let force = {x: (sign.dx)*power, y: (sign.dy)*power};
+
+            Body.applyForce(e.body, {x: e.body.position.x, y: e.body.position.y}, force)
+
+            
+            // let a = 2;
+
+            // console.dir(userMConst)
+            // console.dir(userMouse)
             
         }
         console.dir(e.body.position)
@@ -302,4 +341,19 @@ function startGame() {
     });
 }
 
+function vectorSign(oldP, newP) {
+    console.log("ran vectorSIGN");
+    
+    const isPositiveX = oldP.x < newP.x;
+    const isPositiveY = oldP.y < newP.y;
+  
+    return {
+      dx: isPositiveX ? 1 : -1,
+      dy: isPositiveY ? 1 : -1
+    };
+}
+
+setTimeout(() => {
 startGame();
+    
+}, 1000);
