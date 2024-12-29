@@ -234,6 +234,9 @@ pockets.forEach(el => {
     console.log("--");
 });
 
+createBounds();
+
+
 // add all of the bodies to the world
 Composite.add(engine.world, buffer);
 // Composite.add(engine.world, arr);
@@ -283,7 +286,7 @@ function startGame() {
     // userMouse.setElement(canvas)
     start = true;
     buffer.forEach(el => {
-        if (el.label == "Rectangle Body") {
+        if (el.label == "Rectangle Body" && el.id < 26) {
                 Composite.remove(engine.world ,el);
         }
     });
@@ -325,6 +328,10 @@ function startGame() {
             // console.log(e.clientX);
             // https://stackoverflow.com/questions/72858881/matter-js-apply-force-onto-body-using-angle-and-power-level
             var power = Math.sqrt(difX + difY)/1000
+
+
+            //the body should follow the vector of the mouse down and mouse up positions
+
             let force = {x: (sign.dx)*power, y: (sign.dy)*power};
 
             Body.applyForce(e.body, {x: e.body.position.x, y: e.body.position.y}, force)
@@ -341,8 +348,31 @@ function startGame() {
     });
 }
 
+function createBounds() {
+    let t;
+    let b;
+    let l;
+    let r;
+    // height: canvasSize,
+    // width: canvasSize*2,
+    let height = 15;
+    let width = canvasSize*2;
+
+
+    t = Bodies.rectangle(canvasSize/2, canvasSize/2, width, height, {isStatic: true, render: { fillStyle: Color.white},});
+    console.log(t.position);
+    
+
+    buffer.push(t);
+    console.log(buffer);
+    
+    
+}
+
 function vectorSign(oldP, newP) {
     console.log("ran vectorSIGN");
+
+
     
     const isPositiveX = oldP.x < newP.x;
     const isPositiveY = oldP.y < newP.y;
