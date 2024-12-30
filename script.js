@@ -1,4 +1,6 @@
 // const Matter = require("matter-js");
+//fututre updates? 
+//- canvas is the limit to hte 'ball pull'; would be nice to extend it
 
 let canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
@@ -270,7 +272,11 @@ function  getMousePos(canvas, evt) {
     }
   }
 
-
+function pocketCheck() {
+    if (start) {
+        
+    }
+}
 
 function startGame() {
     let oldMouse = {
@@ -292,19 +298,27 @@ function startGame() {
     });
     let userMConst = MouseConstraint.create(engine, {
         mouse: userMouse
+
     });
-    // console.log(userMConst);
+
+    let cueBallAction = false;
     document.addEventListener("mousedown", (e) => {
         oldMouse.x = e.clientX;
         oldMouse.y = e.clientY;
+        console.log("MOSUE DOWN");
+        
     })
     
     Events.on(userMConst, "startdrag", (e)=>{
+    console.log("STERT DRAGG");
     
-        if (e.body.id == 1) {//id 1 for matter js!
-            // let force = {x: dragStrength, y: dragStrength};
-            // Body.applyForce(e.body, {x: e.body.position.x, y: e.body.position.y}, force)
+        if (e.body.id == 1) {//cue ball is id 1 for matter js
+
+            cueBallAction = true;
+        } else {
+            cueBallAction = false;
         }
+
         console.dir(e.body)
 
     });
@@ -312,29 +326,49 @@ function startGame() {
     document.addEventListener("mouseup", (e) => {
         newMouse.x = e.clientX;
         newMouse.y = e.clientY;
-    })
-    
-    Events.on(userMConst, "enddrag", (e)=>{
-        console.dir(e);
-        console.log("STOPPED DRAGGING");
+        console.log("MOUSE UP");
         
-        if (e.body.id == 1) {//id 1 for matter js!
+    })
+    let distLimit = 400;
+    let tooFar = false;
+
+    Events.on(userMConst, "enddrag", (e)=>{
+        // console.dir(e);
+        console.log("STOPPED DRAGGING");
+        if (cueBallAction == true) {//id 1 for matter js!
             var difX = Math.abs(oldMouse.x - newMouse.x)
             var difY = Math.abs(oldMouse.y - newMouse.y)
             console.dir(e.body.position);
             let sign = vectorSign(oldMouse, newMouse);
             console.log(sign);
+
+            console.log(difX);
+            console.log(difY);
+            
+            
+            if (difX > distLimit) {
+                difX = distLimit;
+            } 
+
+            if (difY > distLimit) {
+                difY = distLimit;
+            } 
+
             
             // console.log(e.clientX);
             // https://stackoverflow.com/questions/72858881/matter-js-apply-force-onto-body-using-angle-and-power-level
-            var power = Math.sqrt(difX + difY)/1000
+            var power = Math.sqrt(Math.pow(difX,2) + Math.pow(difY, 2))/1000000
 
 
             //the body should follow the vector of the mouse down and mouse up positions
 
-            let force = {x: (sign.dx)*power, y: (sign.dy)*power};
+            let force = {x: (sign.dx)*difX*power, y: (sign.dy)*difY*power};
+            
+            // let force = {x: (sign.dx)*power, y: (sign.dy)*power};
 
+            console.log("force: ", force);
             Body.applyForce(e.body, {x: e.body.position.x, y: e.body.position.y}, force)
+            console.log("CUDE BALL POSITION" ,e.body.position)
 
             
             // let a = 2;
@@ -343,8 +377,7 @@ function startGame() {
             // console.dir(userMouse)
             
         }
-        console.dir(e.body.position)
-
+        cueBallAction = false;
     });
 }
 
@@ -353,20 +386,22 @@ function createBounds() {
     let b;
     let l;
     let r;
-    // height: canvasSize,
-    // width: canvasSize*2,
     let height = 15;
     let width = canvasSize*2;
 
+    t = Bodies.rectangle(canvasSize, 0-(height), width, height, {isStatic: true, render: { fillStyle: Color.white},});
+    b = Bodies.rectangle(canvasSize, canvasSize+ height, width, height, {isStatic: true, render: { fillStyle: Color.white},});
 
-    t = Bodies.rectangle(canvasSize/2, canvasSize/2, width, height, {isStatic: true, render: { fillStyle: Color.white},});
-    console.log(t.position);
+    let Vwidth = height;
+    let Vheight = canvasSize;
+    l = Bodies.rectangle(0-Vwidth, canvasSize/2, Vwidth, Vheight, {isStatic: true, render: { fillStyle: Color.white},});
+    r = Bodies.rectangle(canvasSize*2+Vwidth, canvasSize/2, Vwidth, Vheight, {isStatic: true, render: { fillStyle: Color.white},});
+    console.log(r.position);
     
-
     buffer.push(t);
-    console.log(buffer);
-    
-    
+    buffer.push(b);
+    buffer.push(l);
+    buffer.push(r);
 }
 
 function vectorSign(oldP, newP) {
@@ -382,6 +417,8 @@ function vectorSign(oldP, newP) {
       dy: isPositiveY ? 1 : -1
     };
 }
+
+// createBounds();
 
 setTimeout(() => {
 startGame();
