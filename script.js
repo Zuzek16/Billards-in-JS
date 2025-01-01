@@ -273,10 +273,25 @@ function  getMousePos(canvas, evt) {
   }
 
 function pocketCheck() {
-    if (start) {
-        
+    // if (start) {
+
+        // if (Matter.Collision.collides(a, b) != null) {
+        //     // collision happened
+        // }
+
+        pockets.forEach(el =>{
+            balls.forEach(ball => {
+                if (Matter.Collision.collides(el, ball) != null) {
+                    console.log("COLLISION!");
+                    console.log(Matter.Collision.collides(el, ball));
+
+                    Composite.remove(engine.world, ball);
+                    
+                }
+            })
+        })
     }
-}
+// }
 
 function startGame() {
     let oldMouse = {
@@ -368,6 +383,20 @@ function startGame() {
 
             console.log("force: ", force);
             Body.applyForce(e.body, {x: e.body.position.x, y: e.body.position.y}, force)
+
+            pocketCheck()
+            // pockets.forEach(el =>{
+            //     balls.forEach(ball => {
+            //         if (Matter.Collision.collides(el, ball) != null) {
+            //             console.log("COLLISION!");
+            //             console.log(Matter.Collision.collides(el, ball));
+                        
+                        
+            //         }
+            //         // console.log(Matter.Collision.collides(el, ball));
+                    
+            //     })
+            // })
             console.log("CUDE BALL POSITION" ,e.body.position)
 
             
@@ -424,3 +453,11 @@ setTimeout(() => {
 startGame();
     
 }, 1000);
+
+
+// setTimeout(() => {
+//     pocketCheck();
+        
+//     }, 1000);
+    
+    
