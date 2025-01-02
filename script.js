@@ -51,22 +51,6 @@ class Color {
 }
 
 const colors = [Color.red, Color.yellow, Color.green, Color.purple, Color.orange, Color.brown]
-// const colors = [
-//     "#FF0000",
-//     "#FFFF00",
-//     "#00FF00",
-//     "#0000FF",
-//     "#FF00FF",
-//     "#FFA500",
-//     "#8B4513",
-//     "#CC0000",
-//     "#DDDD00",
-//     "#00CC00",
-//     "#0000CC",
-//     "#DD00FF",
-//     "#FFA050",
-//     "#7B2F03"
-//   ];
 
 var engine = Engine.create({
     gravity: {
@@ -103,27 +87,6 @@ let cueBallStartY = canvasSize/2
 balls[cueBallId] = Bodies.circle(cueballStartX, cueBallStartY, radius, {render: { fillStyle: Color.white}, body:{label:"cueBall"} });
 balls[eightBallId] = Bodies.circle(initX, initY, radius, {render: { fillStyle: Color.black} });
 let timesUsed = 0;
-// for (let i = 1; i <= ColoredBallsNum; i++) {
-//     console.log("ran init of balls");
-//     if (i == cueBallId) {
-//         continue;
-//     }
-//     if (i == eightBallId) {
-//         continue;
-//     } 
-
-//     if (i%2 == 0) {
-
-//         balls[i] = Bodies.circle(x, y, radius, {render: { fillStyle: Color.orange } });
-
-//     } else {//halves
-
-//         balls[i] = Bodies.circle(x, y, radius, {render: { fillStyle: Color.purple } });
-
-//     }
-
-    
-// }
 
 colors.forEach((color, i) => {
         balls.push(Bodies.circle(initX, initY, radius, {render: { fillStyle: color} }));
@@ -137,21 +100,11 @@ colors.forEach((color, i) => {
         
 });
 
-
 let size = 200;
 let table = {
     height: size,
     width: size*2
 }
-
-var boxA = Bodies.rectangle(410, 200, 120, 80);
-var boxB = Bodies.rectangle(450, 50, 80, 80);
-var ground = Bodies.rectangle(400, 610, 810, 60, { isStatic: true,
-    render: {
-        fillStyle: "#342323"
-    }
- });
-const arr = [boxA, boxB, ground];
 
 balls.forEach(el => {
     buffer.push(el);
@@ -187,7 +140,6 @@ for (let i = 0; i < 3; i++) {
         });
     }
     
-
     Body.rotate(triangle[i], degrees_to_radians(60*(counter)));
     
 }
@@ -261,7 +213,7 @@ document.addEventListener("keypress", (e)=>{
 })
 
 //https://stackoverflow.com/questions/17130395/real-mouse-position-in-canvas
-function  getMousePos(canvas, evt) {
+function getMousePos(canvas, evt) {
     let rect = canvas.getBoundingClientRect(); // abs. size of element
     let scaleX = canvas.width / rect.width;    // relationship bitmap vs. element for x
     let scaleY = canvas.height / rect.height;  // relationship bitmap vs. element for y
@@ -272,21 +224,23 @@ function  getMousePos(canvas, evt) {
     }
   }
 
-function pocketCheck() {
-    // if (start) {
+function returnCueBall(cue) {
+    console.log("ran return cueball");
+    
+    cue.position = {
+        x: cueballStartX,
+        y: cueBallStartY
+    }    
+}
 
-        // if (Matter.Collision.collides(a, b) != null) {
-        //     // collision happened
-        // }
-
+function pocketCheck() {//if it moves check it/ or when it stops
         pockets.forEach(el =>{
             balls.forEach(ball => {
                 if (Matter.Collision.collides(el, ball) != null) {
+                    
                     console.log("COLLISION!");
                     console.log(Matter.Collision.collides(el, ball));
-
-                    Composite.remove(engine.world, ball);
-                    
+                   
                 }
             })
         })
@@ -326,15 +280,11 @@ function startGame() {
     
     Events.on(userMConst, "startdrag", (e)=>{
     console.log("STERT DRAGG");
-    
         if (e.body.id == 1) {//cue ball is id 1 for matter js
-
             cueBallAction = true;
         } else {
             cueBallAction = false;
         }
-
-        console.dir(e.body)
 
     });
 
@@ -369,11 +319,8 @@ function startGame() {
                 difY = distLimit;
             } 
 
-            
-            // console.log(e.clientX);
             // https://stackoverflow.com/questions/72858881/matter-js-apply-force-onto-body-using-angle-and-power-level
             var power = Math.sqrt(Math.pow(difX,2) + Math.pow(difY, 2))/1000000
-
 
             //the body should follow the vector of the mouse down and mouse up positions
 
@@ -382,24 +329,11 @@ function startGame() {
             // let force = {x: (sign.dx)*power, y: (sign.dy)*power};
 
             console.log("force: ", force);
-            Body.applyForce(e.body, {x: e.body.position.x, y: e.body.position.y}, force)
+            Body.applyForce(e.body, {x: e.body.position.x, y: e.body.position.y}, force);
 
-            pocketCheck()
-            // pockets.forEach(el =>{
-            //     balls.forEach(ball => {
-            //         if (Matter.Collision.collides(el, ball) != null) {
-            //             console.log("COLLISION!");
-            //             console.log(Matter.Collision.collides(el, ball));
-                        
-                        
-            //         }
-            //         // console.log(Matter.Collision.collides(el, ball));
-                    
-            //     })
-            // })
+            // pocketCheck();
             console.log("CUDE BALL POSITION" ,e.body.position)
 
-            
             // let a = 2;
 
             // console.dir(userMConst)
@@ -407,6 +341,65 @@ function startGame() {
             
         }
         cueBallAction = false;
+    });
+
+    ///collision
+    Events.on(engine, 'collisionStart',(event)=>{
+        console.log("START OF COLLISION");
+        // console.dir(event);
+        if (event.source.pairs.collisionActive[0] == null ) {
+            console.log("NO PAIRS");
+            
+            return;
+        }
+        let bodyA = event.source.pairs.collisionActive[0].bodyA;
+        let bodyB = event.source.pairs.collisionActive[0].bodyB;
+        console.log(bodyA);
+        console.log(bodyB);
+
+        console.log(bodyA.id);
+        console.log(bodyB.id);
+        
+
+        let idBounds = 21;
+        let idBoundsOut = 26;
+
+        if (bodyA.id >= idBounds && bodyA.id <= idBoundsOut) {
+            console.log("its a pocket");
+            
+            if (bodyB.id == 1) {
+                returnCueBall(bodyB);
+            } else {
+                Composite.remove(engine.world, bodyB);
+
+            } 
+        
+        } else if (bodyB.id >= idBounds && bodyB.id <= idBoundsOut) {
+            console.log("its a pocket");
+
+            if (bodyA.id == 1) {
+                returnCueBall(bodyA);
+            } else {
+                Composite.remove(engine.world, bodyA);
+
+            } 
+        }
+
+        
+    });
+
+    Events.on(engine, 'collisionEnd',(event)=>{
+        // var pairs = event.pairs;
+        
+        // for (var i = 0, j = pairs.length; i != j; ++i) {
+        //     var pair = pairs[i];
+
+        //     if (pair.bodyA === collider) {
+        //         pair.bodyB.render.strokeStyle = colorB;
+        //     } else if (pair.bodyB === collider) {
+        //         pair.bodyA.render.strokeStyle = colorB;
+        //     }
+        // }
     });
 }
 
@@ -451,13 +444,13 @@ function vectorSign(oldP, newP) {
 
 setTimeout(() => {
 startGame();
+console.dir(buffer);
     
 }, 1000);
 
-
-// setTimeout(() => {
-//     pocketCheck();
-        
-//     }, 1000);
+console.dir(buffer);
     
+// for (let i = 21; i < 27; i++) {
+   Composite.remove(engine.world, buffer[21]);
     
+// }
