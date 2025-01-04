@@ -8,7 +8,8 @@ let canvasSize = 850;
 
 //ball ordered is scrambeled?
 
-var Engine = Matter.Engine,
+let Engine = Matter.Engine,
+    World = Matter.World,
     Body = Matter.Body,
     Render = Matter.Render,
     Runner = Matter.Runner,
@@ -52,13 +53,13 @@ class Color {
 
 const colors = [Color.red, Color.yellow, Color.green, Color.purple, Color.orange, Color.brown]
 
-var engine = Engine.create({
+let engine = Engine.create({
     gravity: {
         scale: 0
     },
 });
 
-var render = Render.create({//was hard to find info on this!
+let render = Render.create({//was hard to find info on this!
     element: document.body,
     engine: engine,
     canvas: canvas,
@@ -84,8 +85,8 @@ let line = 10;
 let cueballStartX = canvasSize/2;
 let cueBallStartY = canvasSize/2
 
-balls[cueBallId] = Bodies.circle(cueballStartX, cueBallStartY, radius, {render: { fillStyle: Color.white}, body:{label:"cueBall"} });
-balls[eightBallId] = Bodies.circle(initX, initY, radius, {render: { fillStyle: Color.black} });
+balls[cueBallId] = Bodies.circle(cueballStartX, cueBallStartY, radius, {render: { fillStyle: Color.white}, label: "cueBall"});
+balls[eightBallId] = Bodies.circle(initX, initY, radius, {render: { fillStyle: Color.black}, label: "8-ball" });
 let timesUsed = 0;
 
 colors.forEach((color, i) => {
@@ -107,6 +108,9 @@ let table = {
 }
 
 balls.forEach(el => {
+    let airFri = 0.01;
+    el.frictionAir = airFri/2
+
     buffer.push(el);
     
 });
@@ -122,21 +126,27 @@ for (let i = 0; i < 3; i++) {
             isStatic: true,
             render: {
                 fillStyle: "brown"
-            }
+            },
+            label: "triangle"
+
         });    
     } else if (i == 1) {
         triangle[i] = Bodies.rectangle(initX-12+offset, initY+(sideLength/4), 12, sideLength, {
             isStatic: true,
             render: {
                 fillStyle: "brown"
-            }
+            },
+            label: "triangle"
+
         });
     } else {
         triangle[i] = Bodies.rectangle(initX-12+offset+(sideLength/2), initY, 12, sideLength, {
             isStatic: true,
             render: {
                 fillStyle: "brown"
-            }
+            },
+            label: "triangle"
+
         });
     }
     
@@ -175,40 +185,39 @@ let numberOfPockets = 6;//only even ?
             render: {
                 fillStyle: Color.hole
             },
-            isStatic: true
+            isStatic: true,
+            label: "pocket"
           });
 
           buffer.push(pockets[i]);
          
         }
 
-pockets.forEach(el => {
-    console.log(el.position.x);
-    console.log(el.position.y);
-    console.log("--");
-});
-
 createBounds();
 
-
 // add all of the bodies to the world
-Composite.add(engine.world, buffer);
-// Composite.add(engine.world, arr);
+// Composite.add(engine.world, buffer);
 
 // run the renderer
 Render.run(render);
 
 // create runner
-var runner = Runner.create();
+let runner = Runner.create();
 
 // run the engine
 Runner.run(runner, engine);
+
+World.add(engine.world, buffer)
+
 
 let start = false;
 document.addEventListener("keypress", (e)=>{
     if (e.key == "Enter") {
         console.log("start game?");
         startGame();
+    }
+    if (e.key == "q") {
+        returnCueBall(buffer[cueBallId]);
     }
 })
 
@@ -226,26 +235,12 @@ function getMousePos(canvas, evt) {
 
 function returnCueBall(cue) {
     console.log("ran return cueball");
-    
+    Body.set(cue, )
     cue.position = {
         x: cueballStartX,
         y: cueBallStartY
     }    
 }
-
-function pocketCheck() {//if it moves check it/ or when it stops
-        pockets.forEach(el =>{
-            balls.forEach(ball => {
-                if (Matter.Collision.collides(el, ball) != null) {
-                    
-                    console.log("COLLISION!");
-                    console.log(Matter.Collision.collides(el, ball));
-                   
-                }
-            })
-        })
-    }
-// }
 
 function startGame() {
     let oldMouse = {
@@ -261,37 +256,33 @@ function startGame() {
     // userMouse.setElement(canvas)
     start = true;
     buffer.forEach(el => {
-        if (el.label == "Rectangle Body" && el.id < 26) {
-                Composite.remove(engine.world ,el);
+        
+        if (el.label == "triangle") {
+                Composite.remove(engine.world, el);
         }
     });
     let userMConst = MouseConstraint.create(engine, {
         mouse: userMouse
-
     });
 
     let cueBallAction = false;
     document.addEventListener("mousedown", (e) => {
         oldMouse.x = e.clientX;
         oldMouse.y = e.clientY;
-        console.log("MOSUE DOWN");
-        
     })
     
     Events.on(userMConst, "startdrag", (e)=>{
-    console.log("STERT DRAGG");
         if (e.body.id == 1) {//cue ball is id 1 for matter js
             cueBallAction = true;
         } else {
             cueBallAction = false;
         }
-
     });
 
     document.addEventListener("mouseup", (e) => {
         newMouse.x = e.clientX;
         newMouse.y = e.clientY;
-        console.log("MOUSE UP");
+        // console.log("MOUSE UP");
         
     })
     let distLimit = 400;
@@ -299,16 +290,15 @@ function startGame() {
 
     Events.on(userMConst, "enddrag", (e)=>{
         // console.dir(e);
-        console.log("STOPPED DRAGGING");
+        // console.log("STOPPED DRAGGING");
         if (cueBallAction == true) {//id 1 for matter js!
             var difX = Math.abs(oldMouse.x - newMouse.x)
             var difY = Math.abs(oldMouse.y - newMouse.y)
-            console.dir(e.body.position);
+            // console.dir(e.body.position);
             let sign = vectorSign(oldMouse, newMouse);
-            console.log(sign);
 
-            console.log(difX);
-            console.log(difY);
+            // console.log(difX);
+            // console.log(difY);
             
             
             if (difX > distLimit) {
@@ -328,79 +318,100 @@ function startGame() {
             
             // let force = {x: (sign.dx)*power, y: (sign.dy)*power};
 
-            console.log("force: ", force);
+            // console.log("force: ", force);
             Body.applyForce(e.body, {x: e.body.position.x, y: e.body.position.y}, force);
-
-            // pocketCheck();
-            console.log("CUDE BALL POSITION" ,e.body.position)
-
-            // let a = 2;
-
-            // console.dir(userMConst)
-            // console.dir(userMouse)
             
         }
         cueBallAction = false;
     });
 
     ///collision
+    console.dir(engine);
+    // let collisionCounter = 0;
     Events.on(engine, 'collisionStart',(event)=>{
-        console.log("START OF COLLISION");
-        // console.dir(event);
-        if (event.source.pairs.collisionActive[0] == null ) {
-            console.log("NO PAIRS");
+      
+        event.source.pairs.collisionActive.forEach(el=>{
+            // console.log(el);
+
+            let bodyA = el.bodyA;
+            let bodyB = el.bodyB;
+
             
-            return;
-        }
-        let bodyA = event.source.pairs.collisionActive[0].bodyA;
-        let bodyB = event.source.pairs.collisionActive[0].bodyB;
-        console.log(bodyA);
-        console.log(bodyB);
-
-        console.log(bodyA.id);
-        console.log(bodyB.id);
-        
-
-        let idBounds = 21;
-        let idBoundsOut = 26;
-
-        if (bodyA.id >= idBounds && bodyA.id <= idBoundsOut) {
-            console.log("its a pocket");
             
-            if (bodyB.id == 1) {
-                returnCueBall(bodyB);
-            } else {
-                Composite.remove(engine.world, bodyB);
-
-            } 
+            
+            if (!(bodyA.label  == "bounds" || bodyB.label == "bounds")) {
+                console.log(bodyA);
+            console.log(bodyB);
+                if (bodyA.label == "pocket") {
+                    console.log("its a pocket");
+                    
+                    if (bodyB.label == "cueBall") {
+                        returnCueBall(bodyB);
+                    } else {
+                        console.log("removing");
+                        
+                        Composite.remove(engine.world, bodyB);
         
-        } else if (bodyB.id >= idBounds && bodyB.id <= idBoundsOut) {
-            console.log("its a pocket");
-
-            if (bodyA.id == 1) {
-                returnCueBall(bodyA);
-            } else {
-                Composite.remove(engine.world, bodyA);
-
-            } 
-        }
-
+                    } 
+                
+                } else if (bodyB.label == "pocket") {
+                    console.log("its a pocket");
         
-    });
-
-    Events.on(engine, 'collisionEnd',(event)=>{
-        // var pairs = event.pairs;
+                    if (bodyA.label == "cueBall") {
+                        returnCueBall(bodyA);
+                    } else {
+                        console.log("removing");
+                        
+                        Composite.remove(engine.world, bodyA);
         
-        // for (var i = 0, j = pairs.length; i != j; ++i) {
-        //     var pair = pairs[i];
+                    } 
+                }
+            }
 
-        //     if (pair.bodyA === collider) {
-        //         pair.bodyB.render.strokeStyle = colorB;
-        //     } else if (pair.bodyB === collider) {
-        //         pair.bodyA.render.strokeStyle = colorB;
-        //     }
+          
+        })
+
+        // if (event.pairs.bodyA == undefined ) {
+        //     console.log("NO PAIRS");
+            
+        //     return;
         // }
+        // const collisionPair = event.source.pairs.collisionActive[0];
+        // const bodyA = collisionPair.bodyA;
+        // const bodyB = collisionPair.bodyB;
+        // // let bodyA = event.pairs.bodyA;
+        // // let bodyB = event.pairs.bodyB;
+        // console.log(bodyA);
+        // console.log(bodyB);
+        // console.log(a);
+        // console.log(b);
+        // engine.world.bodies.forEach(el =>{
+        //     // console.log(el.id);
+        //     if (el.id == bodyA.id ) {
+        //         console.log(bodyA);
+                
+        //     } else if ( el.id == bodyB.id) {
+        //         console.log(bodyB);
+                
+        //     }
+            
+        // })
+
+//herer
+        
     });
+
+//     Matter.Events.on(engine, 'collisionEnd',(event)=>{
+//         if (event.source.pairs.collisionActive[0] == null ) {
+//             console.log("NO PAIRS");
+            
+//             return;
+//         }
+//         let bodyAend = event.source.pairs.collisionActive[0].bodyA;
+//         let bodyBend = event.source.pairs.collisionActive[0].bodyB;
+//         console.log(bodyAend);
+//         console.log(bodyBend);
+//     })
 }
 
 function createBounds() {
@@ -410,14 +421,15 @@ function createBounds() {
     let r;
     let height = 15;
     let width = canvasSize*2;
+    let label = "bounds";
 
-    t = Bodies.rectangle(canvasSize, 0-(height), width, height, {isStatic: true, render: { fillStyle: Color.white},});
-    b = Bodies.rectangle(canvasSize, canvasSize+ height, width, height, {isStatic: true, render: { fillStyle: Color.white},});
+    t = Bodies.rectangle(canvasSize, 0-(height), width, height, {isStatic: true, render: { fillStyle: Color.white}, label: label});
+    b = Bodies.rectangle(canvasSize, canvasSize+ height, width, height, {isStatic: true, render: { fillStyle: Color.white}, label: label});
 
     let Vwidth = height;
     let Vheight = canvasSize;
-    l = Bodies.rectangle(0-Vwidth, canvasSize/2, Vwidth, Vheight, {isStatic: true, render: { fillStyle: Color.white},});
-    r = Bodies.rectangle(canvasSize*2+Vwidth, canvasSize/2, Vwidth, Vheight, {isStatic: true, render: { fillStyle: Color.white},});
+    l = Bodies.rectangle(0-Vwidth, canvasSize/2, Vwidth, Vheight, {isStatic: true, render: { fillStyle: Color.white}, label: label});
+    r = Bodies.rectangle(canvasSize*2+Vwidth, canvasSize/2, Vwidth, Vheight, {isStatic: true, render: { fillStyle: Color.white}, label: label});
     console.log(r.position);
     
     buffer.push(t);
@@ -427,10 +439,6 @@ function createBounds() {
 }
 
 function vectorSign(oldP, newP) {
-    console.log("ran vectorSIGN");
-
-
-    
     const isPositiveX = oldP.x < newP.x;
     const isPositiveY = oldP.y < newP.y;
   
@@ -440,17 +448,14 @@ function vectorSign(oldP, newP) {
     };
 }
 
-// createBounds();
-
 setTimeout(() => {
 startGame();
-console.dir(buffer);
+console.dir(engine.world.bodies);
+engine.world.bodies.forEach(el =>{
+    console.log(el.id);
+    
+})
+// console.log(Composite);
+
     
 }, 1000);
-
-console.dir(buffer);
-    
-// for (let i = 21; i < 27; i++) {
-   Composite.remove(engine.world, buffer[21]);
-    
-// }
