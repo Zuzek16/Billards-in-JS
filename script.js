@@ -39,19 +39,13 @@ class Color {
     static purple = "#FF00FF";
     static orange = "#FFA500";
     static brown = "#8B4513";
-    static redDark = "#CC0000";
-    static yellowDark = "#DDDD00";
-    static greenDark = "#00CC00";
-    static blueDark = "#0000CC";
-    static purpleDark = "#DD00FF";
-    static orangeDark = "#FFA050";
-    static brownDark = "#7B2F03";
+  
 
     static pool = "#1a4a1a";
     static hole = "#44280b";
 }
 
-const colors = [Color.red, Color.yellow, Color.green, Color.purple, Color.orange, Color.brown]
+const colors = [Color.red, Color.yellow, Color.green, Color.purple, Color.orange, Color.brown, Color.blue]
 
 let engine = Engine.create({
     gravity: {
@@ -111,6 +105,7 @@ balls.forEach(el => {
     let airFri = 0.01;
     el.frictionAir = 0.0099999;
     el.setMass = el.mass/2;
+    el.restitution = 0.8
 
     buffer.push(el);
     
@@ -159,7 +154,7 @@ buffer.push(e);
 });
 
 let numberOfPockets = 6;//only even ?
-        let pocketSize = radius*1.4;
+        let pocketSize = radius*1.6;
         const pockets = [];//starting from the upper left corner -> clockwise
         y = 0;
         x = 0;
@@ -187,7 +182,8 @@ let numberOfPockets = 6;//only even ?
                 fillStyle: Color.hole
             },
             isStatic: true,
-            label: "pocket"
+            label: "pocket",
+            isSensor: true
           });
 
           buffer.push(pockets[i]);
@@ -195,9 +191,6 @@ let numberOfPockets = 6;//only even ?
         }
 
 createBounds();
-
-// add all of the bodies to the world
-// Composite.add(engine.world, buffer);
 
 // run the renderer
 Render.run(render);
@@ -212,15 +205,6 @@ World.add(engine.world, buffer)
 
 
 let start = false;
-document.addEventListener("keypress", (e)=>{
-    if (e.key == "Enter") {
-        console.log("start game?");
-        startGame();
-    }
-    if (e.key == "q") {
-        returnCueBall(buffer[cueBallId]);
-    }
-})
 
 //https://stackoverflow.com/questions/17130395/real-mouse-position-in-canvas
 function getMousePos(canvas, evt) {
@@ -245,6 +229,40 @@ function placeCueBall(cue, x, y) {
     Body.setVelocity(cue, {x: 0, y: 0});   
 }
 
+function gameOverCheck(){
+
+    
+    let eight = buffer[eightBallId];
+    let cue = buffer[cueBallId];
+    let otherBallsOut = [];
+    balls.forEach(ball=>{
+        if (ball != eight && ball != cue) {
+            if (!Composite.allBodies(engine.world).includes(ball)) {
+                otherBallsOut.push(true)
+            } else {
+                otherBallsOut.push(false);
+
+            }
+        }
+    })
+
+    let gameOverF = false;
+    otherBallsOut.forEach(a=>{
+        if (!a) {
+            gameOverF = true;
+        }
+    })
+    
+    if (!Composite.allBodies(engine.world).includes(eight) && gameOverF) {
+        alert("OH NO! You pocketed the 8-ball before the other balls! \nGame over\nYou can try again");
+        location.reload();
+    }
+
+    if (!Composite.allBodies(engine.world).includes(eight) && !gameOverF) {
+        alert("Thanks for playing!\nYou can hit f5 to refresh and play again!")
+    }
+}
+
 function startGame() {
     let oldMouse = {
         x: 0,
@@ -256,7 +274,6 @@ function startGame() {
     };
     let dragStrength = 0.02;
     let userMouse = Matter.Mouse.create(canvas);
-    // userMouse.setElement(canvas)
     start = true;
     buffer.forEach(el => {
         
@@ -285,7 +302,6 @@ function startGame() {
     document.addEventListener("mouseup", (e) => {
         newMouse.x = e.clientX;
         newMouse.y = e.clientY;
-        // console.log("MOUSE UP");
         
     })
     let distLimit = 400;
@@ -317,37 +333,43 @@ function startGame() {
 
     ///collision
     console.dir(engine);
-    const backlog = [];
-
-
+    let oldBacklog = [];
+    let backlog = [];
 
     function clearBacklog() {
-        backlog.forEach(group =>{
+        oldBacklog.forEach(group =>{
 
-            group.forEach(pair=>{
+            group.forEach((pair, pairId)=>{
+
                 let bodyA = pair.bodyA;
                 let bodyB = pair.bodyB;
-                if ( bodyA.label != bodyB.label
-                     && !(bodyA.label  == "bounds" || bodyB.label == "bounds")
-                     && !(bodyA.label  == "8-ball" && bodyB.label != "pocket")
-                    ) {
-                    console.log(bodyA);
-                console.log(bodyB);
-    
-                }
-                
-                
-            })
+                if (bodyA.label == "pocket") {
+                    backlog.push(bodyB);
+                } else if (bodyB.label == "pocket"){
+                    backlog.push(bodyA);
 
+                }
+            })
         })
+
+        backlog.forEach(el=>{
+            if (el.label == "cueBall") {
+                returnCueBall(el)                
+            } else {
+           Composite.remove(engine.world, el);
+                        gameOverCheck()
+
+            }
+        })
+
+        backlog = [];
+        oldBacklog = [];
     }
 
     Events.on(engine, 'collisionStart',(event)=>{
-        backlog.push(event.source.pairs.collisionActive)
-        // console.log(backlog);
+        oldBacklog.push(event.source.pairs.collisionActive)
         
         event.source.pairs.collisionActive.forEach(el=>{
-            
 
             let bodyA = el.bodyA;
             let bodyB = el.bodyB;
@@ -364,7 +386,7 @@ function startGame() {
                         console.log("removing");
                         
                         Composite.remove(engine.world, bodyB);
-        
+                        gameOverCheck()
                     } 
                 
                 } else if (bodyB.label == "pocket") {
@@ -376,6 +398,7 @@ function startGame() {
                         console.log("removing");
                         
                         Composite.remove(engine.world, bodyA);
+                        gameOverCheck()
         
                     } 
                 }
@@ -389,7 +412,6 @@ function startGame() {
 
     });
 
-  
 }
 
 function createBounds() {
@@ -400,14 +422,17 @@ function createBounds() {
     let height = 500;
     let width = canvasSize*2;
     let label = "bounds";
+    let a = 0.6;
 
-    t = Bodies.rectangle(canvasSize, 0-(height/2), width, height, {isStatic: true, render: { fillStyle: Color.white}, label: label});
-    b = Bodies.rectangle(canvasSize, canvasSize+ (height/2), width, height, {isStatic: true, render: { fillStyle: Color.white}, label: label});
+    let options = {isStatic: true, render: { fillStyle: Color.white}, label: label, restitution: a};
+
+    t = Bodies.rectangle(canvasSize, 0-(height/2), width, height, options);
+    b = Bodies.rectangle(canvasSize, canvasSize+ (height/2), width, height, options);
 
     let Vwidth = height;
     let Vheight = canvasSize;
-    l = Bodies.rectangle(0-Vwidth/2, canvasSize/2, Vwidth, Vheight, {isStatic: true, render: { fillStyle: Color.white}, label: label});
-    r = Bodies.rectangle((canvasSize*2)+Vwidth/2, canvasSize/2, Vwidth, Vheight, {isStatic: true, render: { fillStyle: Color.white}, label: label});
+    l = Bodies.rectangle(0-Vwidth/2, canvasSize/2, Vwidth, Vheight, options);
+    r = Bodies.rectangle((canvasSize*2)+Vwidth/2, canvasSize/2, Vwidth, Vheight, options);
     console.log(r.position);
     
     buffer.push(t);
@@ -428,12 +453,6 @@ function vectorSign(oldP, newP) {
 
 setTimeout(() => {
 startGame();
-console.dir(engine.world.bodies);
-engine.world.bodies.forEach(el =>{
-    // console.log(el.id);
-    
-})
-// console.log(Composite);
 
     
-}, 1000);
+}, 1800);
