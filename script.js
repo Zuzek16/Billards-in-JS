@@ -109,7 +109,8 @@ let table = {
 
 balls.forEach(el => {
     let airFri = 0.01;
-    el.frictionAir = airFri/2
+    el.frictionAir = 0.0099999;
+    el.setMass = el.mass/2;
 
     buffer.push(el);
     
@@ -235,11 +236,13 @@ function getMousePos(canvas, evt) {
 
 function returnCueBall(cue) {
     console.log("ran return cueball");
-    Body.set(cue, )
-    cue.position = {
-        x: cueballStartX,
-        y: cueBallStartY
-    }    
+    Body.setPosition(cue, {x: cueballStartX, y: cueballStartX});
+    Body.setVelocity(cue, {x: 0, y: 0});   
+}
+
+function placeCueBall(cue, x, y) {
+    Body.setPosition(cue, {x: x, y: y});
+    Body.setVelocity(cue, {x: 0, y: 0});   
 }
 
 function startGame() {
@@ -289,17 +292,11 @@ function startGame() {
     let tooFar = false;
 
     Events.on(userMConst, "enddrag", (e)=>{
-        // console.dir(e);
-        // console.log("STOPPED DRAGGING");
         if (cueBallAction == true) {//id 1 for matter js!
             var difX = Math.abs(oldMouse.x - newMouse.x)
             var difY = Math.abs(oldMouse.y - newMouse.y)
             // console.dir(e.body.position);
             let sign = vectorSign(oldMouse, newMouse);
-
-            // console.log(difX);
-            // console.log(difY);
-            
             
             if (difX > distLimit) {
                 difX = distLimit;
@@ -309,39 +306,55 @@ function startGame() {
                 difY = distLimit;
             } 
 
-            // https://stackoverflow.com/questions/72858881/matter-js-apply-force-onto-body-using-angle-and-power-level
             var power = Math.sqrt(Math.pow(difX,2) + Math.pow(difY, 2))/1000000
-
-            //the body should follow the vector of the mouse down and mouse up positions
-
             let force = {x: (sign.dx)*difX*power, y: (sign.dy)*difY*power};
-            
-            // let force = {x: (sign.dx)*power, y: (sign.dy)*power};
-
-            // console.log("force: ", force);
             Body.applyForce(e.body, {x: e.body.position.x, y: e.body.position.y}, force);
             
         }
         cueBallAction = false;
     });
 
+
     ///collision
     console.dir(engine);
-    // let collisionCounter = 0;
+    const backlog = [];
+
+
+
+    function clearBacklog() {
+        backlog.forEach(group =>{
+
+            group.forEach(pair=>{
+                let bodyA = pair.bodyA;
+                let bodyB = pair.bodyB;
+                if ( bodyA.label != bodyB.label
+                     && !(bodyA.label  == "bounds" || bodyB.label == "bounds")
+                     && !(bodyA.label  == "8-ball" && bodyB.label != "pocket")
+                    ) {
+                    console.log(bodyA);
+                console.log(bodyB);
+    
+                }
+                
+                
+            })
+
+        })
+    }
+
     Events.on(engine, 'collisionStart',(event)=>{
-      
+        backlog.push(event.source.pairs.collisionActive)
+        // console.log(backlog);
+        
         event.source.pairs.collisionActive.forEach(el=>{
-            // console.log(el);
+            
 
             let bodyA = el.bodyA;
             let bodyB = el.bodyB;
-
-            
-            
             
             if (!(bodyA.label  == "bounds" || bodyB.label == "bounds")) {
-                console.log(bodyA);
-            console.log(bodyB);
+
+
                 if (bodyA.label == "pocket") {
                     console.log("its a pocket");
                     
@@ -370,48 +383,13 @@ function startGame() {
 
           
         })
-
-        // if (event.pairs.bodyA == undefined ) {
-        //     console.log("NO PAIRS");
-            
-        //     return;
-        // }
-        // const collisionPair = event.source.pairs.collisionActive[0];
-        // const bodyA = collisionPair.bodyA;
-        // const bodyB = collisionPair.bodyB;
-        // // let bodyA = event.pairs.bodyA;
-        // // let bodyB = event.pairs.bodyB;
-        // console.log(bodyA);
-        // console.log(bodyB);
-        // console.log(a);
-        // console.log(b);
-        // engine.world.bodies.forEach(el =>{
-        //     // console.log(el.id);
-        //     if (el.id == bodyA.id ) {
-        //         console.log(bodyA);
-                
-        //     } else if ( el.id == bodyB.id) {
-        //         console.log(bodyB);
-                
-        //     }
-            
-        // })
-
-//herer
         
+
+        clearBacklog();
+
     });
 
-//     Matter.Events.on(engine, 'collisionEnd',(event)=>{
-//         if (event.source.pairs.collisionActive[0] == null ) {
-//             console.log("NO PAIRS");
-            
-//             return;
-//         }
-//         let bodyAend = event.source.pairs.collisionActive[0].bodyA;
-//         let bodyBend = event.source.pairs.collisionActive[0].bodyB;
-//         console.log(bodyAend);
-//         console.log(bodyBend);
-//     })
+  
 }
 
 function createBounds() {
@@ -419,17 +397,17 @@ function createBounds() {
     let b;
     let l;
     let r;
-    let height = 15;
+    let height = 500;
     let width = canvasSize*2;
     let label = "bounds";
 
-    t = Bodies.rectangle(canvasSize, 0-(height), width, height, {isStatic: true, render: { fillStyle: Color.white}, label: label});
-    b = Bodies.rectangle(canvasSize, canvasSize+ height, width, height, {isStatic: true, render: { fillStyle: Color.white}, label: label});
+    t = Bodies.rectangle(canvasSize, 0-(height/2), width, height, {isStatic: true, render: { fillStyle: Color.white}, label: label});
+    b = Bodies.rectangle(canvasSize, canvasSize+ (height/2), width, height, {isStatic: true, render: { fillStyle: Color.white}, label: label});
 
     let Vwidth = height;
     let Vheight = canvasSize;
-    l = Bodies.rectangle(0-Vwidth, canvasSize/2, Vwidth, Vheight, {isStatic: true, render: { fillStyle: Color.white}, label: label});
-    r = Bodies.rectangle(canvasSize*2+Vwidth, canvasSize/2, Vwidth, Vheight, {isStatic: true, render: { fillStyle: Color.white}, label: label});
+    l = Bodies.rectangle(0-Vwidth/2, canvasSize/2, Vwidth, Vheight, {isStatic: true, render: { fillStyle: Color.white}, label: label});
+    r = Bodies.rectangle((canvasSize*2)+Vwidth/2, canvasSize/2, Vwidth, Vheight, {isStatic: true, render: { fillStyle: Color.white}, label: label});
     console.log(r.position);
     
     buffer.push(t);
@@ -452,7 +430,7 @@ setTimeout(() => {
 startGame();
 console.dir(engine.world.bodies);
 engine.world.bodies.forEach(el =>{
-    console.log(el.id);
+    // console.log(el.id);
     
 })
 // console.log(Composite);
